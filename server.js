@@ -5,14 +5,17 @@ import express from "express"
 const app = express();
 app.use(express.json());
 
-const operations = ["Plus", "Minus", "Times", "Divide", "Pow", "Abs", "Fact", "plus", "minus", "times", "divide", "pow", "abs", "fact"];
+const operations = ["PLUS", "MINUS", "TIMES", "DIVIDE", "POW", "ABS", "FACT"];
 let stack = new Stack();
 
 app.post("/independent/calculate", function (req,res){
 
-    const oneArgumentOperation = req.body.operation === "Abs" || req.body.operation === "Fact" || req.body.operation === "abs" || req.body.operation === "fact";
+    let operator = req.body.operation;
+    operator = operator.toUpperCase();         // In order to checking case insensetive
+
+    const oneArgumentOperation = operator === "ABS" || operator === "FACT" ;
     
-    if(!operations.includes(req.body.operation)) {
+    if(!operations.includes(operator)) {
         res.status(409).send({ "error-message": `Error: unknown operation: ${req.operation}`});
         return;
     }
@@ -35,16 +38,12 @@ app.post("/independent/calculate", function (req,res){
         return;
     }
     
-
     let calculation, y;
-    let operator = req.body.operation;
     const x = req.body.arguments[0];
     if(!oneArgumentOperation){
         y = req.body.arguments[1];
     }
 
-    operator = operator.toUpperCase();    // In order to checking case insensetive
-    // needs to check regarding x < y 3 - 4 = -1
 
     switch (operator){
         case 'PLUS':
@@ -52,7 +51,6 @@ app.post("/independent/calculate", function (req,res){
             break
         case 'MINUS':
             calculation = x - y;
-            console.log(calculation);
             break
         case 'TIMES':
             calculation = x * y;
@@ -96,9 +94,12 @@ app.put("/stack/arguments", (req, res) => {
 
 app.get("/stack/operate", function (req,res){
     
-    const oneArgumentOperation = req.query.operation === "Abs" || req.query.operation === "Fact" || req.query.operation === "abs" || req.query.operation === "fact";
-    
-    if(!operations.includes(req.query.operation)) {
+    let operator = req.query.operation;
+    operator = operator.toUpperCase();         // In order to checking case insensetive
+
+    const oneArgumentOperation = operator === "ABS" || operator === "FACT" ;
+
+    if(!operations.includes(operator)) {
         res.status(409).send({ "error-message": `Error: unknown operation: ${req.query.operation}`});
         return;
     }
@@ -114,13 +115,10 @@ app.get("/stack/operate", function (req,res){
 
 
     let calculation, y;
-    let operator = req.query.operation;
     const x = stack.pop();
     if(!oneArgumentOperation){
         y = stack.pop();;
     }
-
-    operator = operator.toUpperCase(); 
 
       switch (operator){
         case 'PLUS':
@@ -128,7 +126,6 @@ app.get("/stack/operate", function (req,res){
             break
         case 'MINUS':
             calculation = x - y;
-            console.log(calculation);
             break
         case 'TIMES':
             calculation = x * y;
